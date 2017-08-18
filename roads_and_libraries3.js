@@ -2,8 +2,31 @@
 'use strict'
 
 function union (A, B) {
-  for (let elm of B)
-    A.add(elm)
+  for (let el of B) {
+    A.add(el)
+  }
+}
+
+function disjAdd (disjSet, vals) {
+  let valFound = false
+  let foundIn = null
+  for (let s of disjSet) {
+    if (s.has(vals[0]) || s.has(vals[1])) {
+      if (valFound) {
+        union(foundIn, s)
+        s.clear()
+        break
+      } else {
+        s.add(vals[0])
+        s.add(vals[1])
+        foundIn = s
+        valFound = true
+      }
+    }
+  }
+  if (!valFound) {
+    disjSet.push(new Set(vals))
+  }
 }
 
 let n = 6
@@ -17,32 +40,11 @@ let roads = [
   [2,3],
 ]
 
-let contacts = []
-let citswroads = new Set()
+let conComps = []
 
-for (let i=0; i<m; i++) {
-  let city = roads[i][0]
-  let nextCity = roads[i][1]
-  if (contacts[city])
-    contacts[city].add(nextCity)
-  else
-    contacts[city] = new Set().add(nextCity)
-
-  if (contacts[nextCity])
-    contacts[nextCity].add(city)
-  else
-    contacts[nextCity] = new Set().add(city)
-}
-console.log(contacts)
-
-for (let i=1; i<n; i++) {
-  for (let city of contacts[i]) {
-    if (contacts[city].size && city !== i) {
-      union(contacts[i], contacts[city])
-      contacts[city].clear()
-    }
-  }
+for (let road of roads) {
+  disjAdd(conComps, road)
 }
 
-console.log(nislands)
-console.log(islands)
+conComps = conComps.filter(val => val.size ? true : false)
+console.log(conComps)
