@@ -1,50 +1,79 @@
 
 'use strict'
 
-function union (A, B) {
-  for (let el of B) {
-    A.add(el)
+function newadjl (edges) {
+  let adjl = new Map()
+
+  for (let e of edges) {
+    let from = e[0]
+    let to = e[1]
+
+    if (adjl.has(from))
+      adjl.get(from).adjs.add(to)
+    else
+      adjl.set(from, {
+        adjs: new Set([to]),
+        visited: 0
+      })
+
+    if (adjl.has(to))
+      adjl.get(to).adjs.add(from)
+    else
+      adjl.set(to, {
+        adjs: new Set([from]),
+        visited: 0
+      })
+  }
+
+  return adjl
+}
+
+function dfs (adjl, start) {
+  let node = adjl.get(start)
+
+  if (node.visited)
+    return
+
+  node.visited = 1
+
+  for (let v of node.adjs) {
+    dfs(adjl, v)
   }
 }
 
-function disjAdd (disjSet, vals) {
-  let valFound = false
-  let foundIn = null
-  for (let s of disjSet) {
-    if (s.has(vals[0]) || s.has(vals[1])) {
-      if (valFound) {
-        union(foundIn, s)
-        s.clear()
-        break
-      } else {
-        s.add(vals[0])
-        s.add(vals[1])
-        foundIn = s
-        valFound = true
-      }
-    }
+// count connected components
+function countcc (adjl) {
+  let s = adjl.size
+  let ncc = 0
+  for (let k of adjl.keys()) {
+    if (adjl.get(k).visited)
+      continue
+    ncc++
+    dfs(adjl, k)
   }
-  if (!valFound) {
-    disjSet.push(new Set(vals))
-  }
+  return ncc
 }
 
-let n = 6
-let m = 6
-let roads = [
-  [1,3],
-  [2,4],
-  [5,6],
-  [3,4],
-  [1,2],
-  [2,3],
-]
+/* TESTS */
 
-let conComps = []
+const edges = [
+    [1,3],
+    [2,4],
+    [5,6],
+    [3,4],
+    [1,2]
+  ]
 
-for (let road of roads) {
-  disjAdd(conComps, road)
+function tnewadjl () {
+  return newadjl(edges)
 }
 
-conComps = conComps.filter(val => val.size ? true : false)
-console.log(conComps)
+function tdfs () {
+  return dfs(newadjl(edges), edges[0][0])
+}
+
+function tcountcc () {
+  return countcc(newadjl(edges))
+}
+
+console.log(tcountcc())
